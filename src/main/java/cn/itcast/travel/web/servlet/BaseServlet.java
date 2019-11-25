@@ -52,6 +52,17 @@ public class BaseServlet extends HttpServlet {
     }
 
     /**
+     * 返回对象的json信息的字符串形式
+     * @param t
+     * @param <T>
+     * @throws IOException
+     */
+    protected <T> String writeObjectJsonAsString(T t) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(t);
+    }
+
+    /**
      * 返回对象的json信息
      * @param t
      * @param response
