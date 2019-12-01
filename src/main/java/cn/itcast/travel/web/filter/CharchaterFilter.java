@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * 解决全站乱码问题，处理所有的请求
  */
-@WebFilter("/*")
+@WebFilter("/")
 public class CharchaterFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -18,18 +18,30 @@ public class CharchaterFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse rep, FilterChain filterChain) throws IOException, ServletException {
+
+
+
         //将父接口转为子接口
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) rep;
-        //获取请求方法
-        String method = request.getMethod();
-        //解决post请求中文数据乱码问题
-        if(method.equalsIgnoreCase("post")){
-            request.setCharacterEncoding("utf-8");
+
+        String url = request.getRequestURI();
+        if(url.endsWith(".css")||url.endsWith(".js")||url.endsWith(".jpg")
+                ||url.endsWith(".gif")||url.endsWith(".png")){
+            filterChain.doFilter(request,response);
+        }else{
+            //获取请求方法
+            String method = request.getMethod();
+            //解决post请求中文数据乱码问题
+            if(method.equalsIgnoreCase("post")){
+                request.setCharacterEncoding("utf-8");
+            }
+            //处理响应乱码
+            response.setContentType("text/html;charset=utf-8");
+            filterChain.doFilter(request,response);
         }
-        //处理响应乱码
-        response.setContentType("text/html;charset=utf-8");
-        filterChain.doFilter(request,response);
+
+
     }
 
     @Override
