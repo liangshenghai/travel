@@ -17,19 +17,44 @@
      * 查询所有的旅游分类
      */
     $.get("category/findAll", null, function (data) {
+
+
+
         //定义首页li
-        var liStr = '<li class="nav-active"><a href="index.html">首页</a></li>';
+        var liStr = '<li class="nav-active" id="homepage"><a href="index.html">首页</a></li>';
         //遍历返回的数据： [{cid:1,cname:"门票"},{cid:1,cname:"门票"},.......]
         for (var i = 0; i < data.length; i++) {
             //拼接返回的数据
-            liStr += '<li><a href="route_list.html?cid='+data[i].cid+'">' + data[i].cname + '</a></li>';
+                liStr += '<li id="category_'+data[i].cid+'"><a href="route_list.html?cid='+data[i].cid+'">' + data[i].cname + '</a></li>';
         }
         //拼接收藏li
         liStr += '<li><a href="favoriterank.html">收藏排行榜</a></li>';
         //添加到UL下
         $("#category_ul").html(liStr);
+
+        //添加导航栏样式
+        var cid = getQueryVariable("cid");
+        $(".nav-active").removeClass("nav-active");
+        if(cid) {
+            $("#category_" + cid).addClass("nav-active");
+        }else {
+            $("#homepage").addClass("nav-active");
+        }
     });
 
+
+    /**
+     * 获取请求参数
+     */
+    function getQueryVariable(variable){
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return false;
+    }
 </script>
 <!-- 头部 start -->
 <header id="header">
