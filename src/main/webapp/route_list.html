@@ -9,34 +9,27 @@
     <link rel="stylesheet" type="text/css" href="css/common.css">
     <link rel="stylesheet" href="css/search.css">
     <script src="js/jquery-3.3.1.js"></script>
+    <script src="js/getParameter.js"></script>
     <script type="text/javascript">
-        /**
-         * 获取请求参数
-         */
-        function getQueryVariable(variable){
-            var query = window.location.search.substring(1);
-            var vars = query.split("&");
-            for (var i=0;i<vars.length;i++) {
-                var pair = vars[i].split("=");
-                if(pair[0] == variable){return pair[1];}
-            }
-            return false;
-        }
-
 
         $(function () {
-            var cid = getQueryVariable("cid");
-            if(!cid){
-                cid = 1;
+            var cid = getParameter("cid");
+            var rname = getParameter("rname");
+            if(rname){
+                rname = window.decodeURIComponent(rname);
+                $("#searchResult").html("【"+rname+"】搜索结果");
+            }else {
+                rname = "";
+                $("#searchResult").html("搜索结果");
             }
-            loadRouteHtml(cid);
 
+            loadRouteHtml(cid,null,rname);
         });
 
-        function loadRouteHtml(cid,currentPage){
+        function loadRouteHtml(cid,currentPage,rname){
 
 
-            $.get("route/pageQuery",{cid:cid,currentPage:currentPage},function(pb){
+            $.get("route/pageQuery",{cid:cid,currentPage:currentPage,rname:rname},function(pb){
                 //1. 分页展示
                 //1. 总条数和总页数
                 $("#totalCount").html(pb.totalCount);
@@ -59,8 +52,8 @@
                  <li class="threeword"><a href="javascript:;">末页</a></li>
                  */
                 var page_lis ="";
-                page_lis += ' <li onclick="loadRouteHtml('+cid+',1)"><a href="javascript:void(0);">首页</a></li>';
-                page_lis += '<li class="threeword" onclick="javascript:loadRouteHtml('+cid+','+(pb.currentPage-1>0?pb.currentPage-1:1)+')"><a href="javascript:void(0);">上一页</a></li>';
+                page_lis += ' <li onclick="loadRouteHtml('+cid+',1,\''+rname+'\')"><a href="javascript:void(0);">首页</a></li>';
+                page_lis += '<li class="threeword" onclick="javascript:loadRouteHtml('+cid+','+(pb.currentPage-1>0?pb.currentPage-1:1)+',\''+rname+'\')"><a href="javascript:void(0);">上一页</a></li>';
 
                 //要显示10个页码。
                 var begin;
@@ -87,13 +80,13 @@
                 for (var i = begin; i <= end; i++) {
                     //是否是当前页面
                     if(i == pb.currentPage){
-                        page_lis += '<li class="curPage" onclick="loadRouteHtml('+cid+','+i+')"><a href="javascript:void(0);">'+i+'</a></li>';
+                        page_lis += '<li class="curPage" onclick="loadRouteHtml('+cid+','+i+',\''+rname+'\')"><a href="javascript:void(0);">'+i+'</a></li>';
                     }else {
-                        page_lis += '<li onclick="loadRouteHtml('+cid+','+i+')"><a href="javascript:void(0);">'+i+'</a></li>';
+                        page_lis += '<li onclick="loadRouteHtml('+cid+','+i+',\''+rname+'\')"><a href="javascript:void(0);">'+i+'</a></li>';
                     }
                 }
-                page_lis += '<li class="threeword" onclick="javascript:loadRouteHtml('+cid+','+(pb.currentPage+1 > pb.totalPage?pb.totalPage: pb.currentPage+1)+')"><a href="javascript:void(0);">下一页</a></li>';
-                page_lis += ' <li class="threeword" onclick="javascript:loadRouteHtml('+cid+','+pb.totalPage+')"><a href="javascript:void(0);">末页</a></li>';
+                page_lis += '<li class="threeword" onclick="javascript:loadRouteHtml('+cid+','+(pb.currentPage+1 > pb.totalPage?pb.totalPage: pb.currentPage+1)+',\''+rname+'\')"><a href="javascript:void(0);">下一页</a></li>';
+                page_lis += ' <li class="threeword" onclick="javascript:loadRouteHtml('+cid+','+pb.totalPage+',\''+rname+'\')"><a href="javascript:void(0);">末页</a></li>';
                 $("#pageNum").html(page_lis);
 
                 //2.列表展示
@@ -132,7 +125,7 @@
                         '                 <span>'+route.price+'</span>\n' +
                         '                 <span>起</span>\n' +
                         '                 </p>\n' +
-                        '                 <p><a href="route_detail.html">查看详情</a></p>\n' +
+                        '                 <p><a href="route_detail.html?rid='+route.rid+'&cid='+route.cid+'">查看详情</a></p>\n' +
                         '                 </div>\n' +
                         '                 </li>';
                 }
@@ -156,7 +149,7 @@
         <div class="contant">
             <div class="crumbs">
                 <img src="images/search.png" alt="">
-                <p>老梁旅行><span>搜索结果</span></p>
+                <p>老梁旅行><span id="searchResult">搜索结果</span></p>
             </div>
             <div class="xinxi clearfix">
                 <div class="left">

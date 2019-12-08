@@ -18,14 +18,14 @@
             <a href="/">首页</a>
             <span> &gt;</span>
             <a href="#">国内游</a><span> &gt;</span>
-            <a href="#">全国-曼谷6-7天自由行 泰国出境旅游 特价往返机票自由行二次确认</a>
+            <a href="#" id="title">全国-曼谷6-7天自由行 泰国出境旅游 特价往返机票自由行二次确认</a>
         </div>
         <div class="prosum_box">
             <dl class="prosum_left">
                 <dt>
                     <img alt="" class="big_img" src="http://www.jinmalvyou.com/Public/uploads/goods_img/img_size4/201703/m49788843d72171643297ccc033d9288ee.jpg">
                 </dt>
-                <dd>
+                <dd id="routeImgList">
                     <a class="up_img up_img_disable"></a>
                     <a title="" class="little_img" data-bigpic="http://www.jinmalvyou.com/Public/uploads/goods_img/img_size4/201703/m40920d0669855e745d97f9ad1df966ebb.jpg">
                         <img src="http://www.jinmalvyou.com/Public/uploads/goods_img/img_size2/201703/m20920d0669855e745d97f9ad1df966ebb.jpg">
@@ -58,20 +58,20 @@
                 </dd>
             </dl>
             <div class="prosum_right">
-               <p class="pros_title">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往返机票自由行二次确认</p>
-                <p class="hot">1-2月出发，网付立享￥1099/2人起！爆款位置有限，抢完即止！</p>
+               <p class="pros_title" id="rname">【尾单特卖】全国-曼谷6-7天自由行 泰国出境旅游 特价往返机票自由行二次确认</p>
+                <p class="hot" id="routeIntroduce">1-2月出发，网付立享￥1099/2人起！爆款位置有限，抢完即止！</p>
                 <div class="pros_other">
-                    <p>经营商家  ：老梁国旅</p>
-                    <p>咨询电话 : 400-618-9090</p>
-                    <p>地址 ： 传智播客老梁程序员</p>
+                    <p>经营商家  ：<span id="sname">老梁国旅</span></p>
+                    <p>咨询电话 : <span id="consphone">400-618-9090</span></p>
+                    <p>地址 ： <span id="address">传智播客老梁程序员</span></p>
                 </div>
                 <div class="pros_price">
-                    <p class="price"><strong>¥2699.00</strong><span>起</span></p>
+                    <p class="price"><strong id="price">¥2699.00</strong><span>起</span></p>
                     <p class="collect">
-                        <a class="btn"><i class="glyphicon glyphicon-heart-empty"></i>点击收藏</a>
+                        <a class="btn" id="favorite"><i class="glyphicon glyphicon-heart-empty"></i>点击收藏</a>
 
-                        <a  class="btn already" disabled="disabled"><i class="glyphicon glyphicon-heart-empty"></i>点击收藏</a>
-                        <span>已收藏100次</span>
+<!--                        <a  class="btn already" disabled="disabled"><i class="glyphicon glyphicon-heart-empty"></i>点击收藏</a>-->
+                        <span id="favoriteCount">已收藏100次</span>
                     </p>
                 </div>        
             </div>
@@ -110,40 +110,101 @@
     <script src="js/bootstrap.min.js"></script>
     <!--导入布局js，共享header和footer-->
     <script type="text/javascript" src="js/include.js"></script>
+    <script src="js/getParameter.js"></script>
     <script>
     $(document).ready(function() {
-        //焦点图效果
-        //点击图片切换图片
-        $('.little_img').on('mousemove', function() {
-            $('.little_img').removeClass('cur_img');
-            var big_pic = $(this).data('bigpic');
-            $('.big_img').attr('src', big_pic);
-            $(this).addClass('cur_img');
-        });
-           //上下切换
-        var picindex = 0;
-        var nextindex = 4;
-        $('.down_img').on('click',function(){
-            var num = $('.little_img').length;
-            if((nextindex + 1) <= num){
-                $('.little_img:eq('+picindex+')').hide();
-                $('.little_img:eq('+nextindex+')').show();
-                picindex = picindex + 1;
-                nextindex = nextindex + 1;
-            }
-        });
-        $('.up_img').on('click',function(){
-            var num = $('.little_img').length;
-            if(picindex > 0){
-                $('.little_img:eq('+(nextindex-1)+')').hide();
-                $('.little_img:eq('+(picindex-1)+')').show();
-                picindex = picindex - 1;
-                nextindex = nextindex - 1;
-            }
-        });
-        //自动播放
-        // var timer = setInterval("auto_play()", 5000);
+        //渲染旅游页面信息
+        loadRouteHtml();
+        //渲染收藏信息
+        loadFavorite();
+
+
     });
+
+    function loadFavorite() {
+        var rid = getParameter("rid");
+        if(!rid){
+            rid = 0;
+        }
+        $.get("route/isFavorite",{rid:rid},function (data) {
+            //<a  class="btn already" disabled="disabled"><i class="glyphicon glyphicon-heart-empty"></i>点击收藏</a>
+           if(data.flag){
+               $("#favorite").unbind("click");
+                $("#favorite").addClass("already");
+                $("#favorite").attr("disabled","disabled");
+           }else {
+               $("#favorite").removeClass("already");
+               $("#favorite").removeAttr("disabled");
+               //收藏按钮点击
+               $("#favorite").bind("click",function () {
+                   var rid = getParameter("rid");
+                   if(!rid){
+                       rid = 0;
+                   }
+                   $.get("route/favoriteRoute",{rid:rid},function (data) {
+                       if(data.flag){
+                           alert("收藏成功！");
+                           //解除click事件
+                           $("#favorite").unbind("click");
+                           //重新渲染一次旅游路线信息
+                           loadRouteHtml();
+                           //重新渲染一次收藏信息
+                           loadFavorite();
+                           return;
+                       }else {
+                           alert(data.errorMsg);
+                           if (data.errorMsg.indexOf("登录") > 0 ){
+                               window.location.href="login.html";
+                               return;
+                           }
+                       }
+                   });
+
+               });
+           }
+        });
+    }
+
+
+
+
+    //渲染旅游页面信息
+    function loadRouteHtml(){
+        var rid = getParameter("rid");
+        if(!rid){
+            rid = 0;
+        }
+        $.get("route/findOne",{rid:rid},function (route) {
+            //1 .旅游线路详情填充
+            $("#rname").html(route.rname);
+            $("#title").html(route.rname);
+            $("#price").html("￥"+route.price);
+            $("#routeIntroduce").html(route.routeIntroduce);
+            $("#sname").html(route.seller.sname);
+            $("#consphone").html(route.seller.consphone);
+            $("#address").html(route.seller.address);
+            //收藏次数动态显示
+            $("#favoriteCount").html("已收藏"+route.count+"次");
+            // 2。旅游图片详情渲染
+            var routeImgStr = '<a class="up_img up_img_disable"></a>';
+            for (var i = 0; i < route.routeImgList.length; i++) {
+                var imgStr = "";
+                if(i >= 4){
+                    imgStr = '<a title="'+route.rname+'" class="little_img" data-bigpic="'+route.routeImgList[i].bigPic+'" style="display:none;"><img src="'+route.routeImgList[i].smallPic+'"></a>';
+                }else {
+                    imgStr = '<a title="'+route.rname+'" class="little_img" data-bigpic="'+route.routeImgList[i].bigPic+'"><img src="'+route.routeImgList[i].smallPic+'"></a>';
+                }
+                routeImgStr += imgStr;
+
+            }
+            routeImgStr +='<a class="down_img down_img_disable" style="margin-bottom: 0;"></a>';
+            $("#routeImgList").html(routeImgStr);
+            //执行图形渲染
+            goImg();
+        });
+
+    }
+
 
     //自动轮播方法
     function auto_play() {
@@ -167,6 +228,44 @@
             $('.big_img').attr('src', big_pic);
         }
     }
+
+
+
+
+    function goImg() {
+        //焦点图效果
+        //点击图片切换图片
+        $('.little_img').on('mousemove', function() {
+            $('.little_img').removeClass('cur_img');
+            var big_pic = $(this).data('bigpic');
+            $('.big_img').attr('src', big_pic);
+            $(this).addClass('cur_img');
+        });
+        //上下切换
+        var picindex = 0;
+        var nextindex = 4;
+        $('.down_img').on('click',function(){
+            var num = $('.little_img').length;
+            if((nextindex + 1) <= num){
+                $('.little_img:eq('+picindex+')').hide();
+                $('.little_img:eq('+nextindex+')').show();
+                picindex = picindex + 1;
+                nextindex = nextindex + 1;
+            }
+        });
+        $('.up_img').on('click',function(){
+            var num = $('.little_img').length;
+            if(picindex > 0){
+                $('.little_img:eq('+(nextindex-1)+')').hide();
+                $('.little_img:eq('+(picindex-1)+')').show();
+                picindex = picindex - 1;
+                nextindex = nextindex - 1;
+            }
+        });
+        //自动播放
+        var timer = setInterval("auto_play()", 5000);
+    }
+
     </script>
 </body>
 

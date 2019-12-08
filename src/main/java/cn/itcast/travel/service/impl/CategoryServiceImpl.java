@@ -44,6 +44,8 @@ public class CategoryServiceImpl implements CategoryService {
                 categoryList.add(category);
             }
         }
+
+        jedis.close();
         return categoryList;
     }
 }
